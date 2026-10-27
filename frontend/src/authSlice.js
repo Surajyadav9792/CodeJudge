@@ -131,7 +131,7 @@ const authSlice = createSlice({
       // Check Auth Cases
       .addCase(checkAuth.pending, (state) => {
         state.loading = typeof window !== 'undefined' && localStorage.getItem('wasLoggedIn') === 'true';
-        state.error = null;
+        // Do NOT clear error here — preserves login/register error messages
       })
       .addCase(checkAuth.fulfilled, (state, action) => {
         state.loading = false;
@@ -145,7 +145,10 @@ const authSlice = createSlice({
       })
       .addCase(checkAuth.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || null;
+        // Only set error if it's a real error (not 401/timeout which pass null)
+        if (action.payload) {
+          state.error = action.payload;
+        }
         state.isAuthenticated = false;
         state.user = null;
         if (typeof window !== 'undefined') {
